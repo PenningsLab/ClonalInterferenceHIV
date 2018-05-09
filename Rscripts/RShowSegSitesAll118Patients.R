@@ -1,5 +1,5 @@
 #prepare data and load some packages and functions
-if (TRUE){
+if (FALSE){
     #  setwd("~/Dropbox/ExplDataAnalysisR/Kadie/ClonalInteference/RScripts")
     source("Rscripts/RfunctionsVisualizeData.r")	
     source("Rscripts/GetConsensusB.r")	
@@ -21,7 +21,7 @@ List99Pats<-unique(PatientOverview$patient)
 ShowSingletons=FALSE
 ShowOnlyResSites=TRUE
 
-for (patname in List99Pats[1]){
+for (patname in List99Pats[c(13,14)]){
     #gather information about the sequences in this patient before the sweep and at the timepoint where the sweep is detected. 
     if (TRUE){	
         #set filename and read fasta file into patfasta
@@ -72,16 +72,21 @@ for (patname in List99Pats[1]){
     ){
         cexpos=1; wl=0.4; wr=0.4; he=0.4; HE=0.4
         #open a png file to make a figure
-        widthpng=1000+10*length(SitesToDraw)
+        widthpng=300+25*length(SitesToDraw)
         heightpng=500+10*numseqs	
-        figurefilename=paste("Output/Jan2018Graphs/", patname,"COMPLETE.png",sep="");
+        figurefilename=paste("Output/Jan2018Graphs/", patname,"Short.png",sep="");
         png(figurefilename,width=widthpng,height=heightpng,units="px",pointsize=12,bg="white")
-        par(mar=c(1,1,3,1))
+        par(mar=c(1,1,3,0))
         #make empty plot
         plot(1:2,1:2,col="white",ylim=c(-4,(length(patfasta[,1]))+length(days))+2,xlim=c(-1,length(SitesToDraw)+6),ylab="",xlab="sites",yaxt="n",xaxt="n",frame.plot=FALSE)
         title(main=paste("Viral sequences from patient",substr(patname,4,6)),cex.main = 2)	
-        text(1+length(SitesToDraw)/8,-2,"PROTEASE",cex=cexpos+0.6)
-        text((min(which(SitesToDraw>297))+length(SitesToDraw))/2,-2,"REVERSE TRANSCRIPTASE",cex=cexpos+0.6)
+        
+        if (length(PROpositions)>=3) rect(xleft = 0.,ybottom = -3,xright = length(PROpositions)+0.5,ytop = -1.3,col="black")
+        if (length(RTIpositions)>=3) rect(xleft = length(PROpositions) +0.5,ybottom = -3,xright =length(SitesToDraw)+1  ,ytop = -1.3,col="grey")
+        extrasize=0.6; protext="PROTEASE"; RTtext="REVERSE TRANSCRIPTASE"
+        if ((length(PROpositions)<=6)|(length(RTIpositions)<=6)){extrasize=0.6;protext="PRO"; RTtext="RT"}
+        if (length(PROpositions)>=3) text(1+length(SitesToDraw)/8,-2,protext,cex=cexpos+extrasize,col="white")
+        if (length(RTIpositions)>=3) text((min(which(SitesToDraw>297))+length(SitesToDraw))/2,-2,RTtext,cex=cexpos+extrasize,col="white")
         
         #indicate the locations of important resistance mutations (codon number and grey color)
         for (p in PatSpecResistanceCodons){
@@ -164,7 +169,7 @@ for (patname in List99Pats[1]){
             lines(x=c(0,length(SitesToDraw)+1),y=c(height[2]+0.5,height[2]+0.5),col=1)
             lines(x=c(0,0),y=c(height[1]-0.5,height[2]+0.5))
             lines(x=c(length(SitesToDraw)+1,length(SitesToDraw)+1),y=c(height[1]-0.5,height[2]+0.5))
-            text(length(SitesToDraw)+4, mean(height)+0.5,paste("day",as.numeric(days[d])),cex=cexpos*2,srt=0)}
+            text(pos=4, length(SitesToDraw)+1.2, mean(height),paste("day",as.numeric(days[d])),cex=cexpos*2,srt=0)}
         
         #mtext("Data from Bacheler et al 2000, Figure related to and by: Pennings, Kryazhimskiy, Wakeley 2013", 4, line=-2)
         
