@@ -1,27 +1,11 @@
 #prepare data and load some packages and functions
-if (FALSE){
-    #  setwd("~/Dropbox/ExplDataAnalysisR/Kadie/ClonalInteference/RScripts")
-    source("Rscripts/RfunctionsVisualizeData.r")	
-    source("Rscripts/GetConsensusB.r")	
-    read.csv("OriginalData/PatientOverview.csv")->PatientOverview  #data on 170 patients
-    library(ape)
-    library(seqinr)
-    library(pegas)	
-    library(RColorBrewer)
-    NNRTIcolumns<-which(substr(names(PatientOverview),1,2)=="NN")
-    NRTIcolumns<-which(substr(names(PatientOverview),1,2)=="NR")
-    PIcolumns<-which(substr(names(PatientOverview),1,2)=="PI")
-    MutColumns<-c(NNRTIcolumns,NRTIcolumns,PIcolumns)	
-    #For EFV treatment, NN179, NN227 and NN138 are not relevant. I am going to remove them.
-    C<-which(names(PatientOverview)=="NN138"|names(PatientOverview)=="NN179"|names(PatientOverview)=="NN227")
-    MutColumns<-MutColumns[-which(MutColumns==12|MutColumns==13|MutColumns==17)]
-}
+if (TRUE) source("Rscripts/PrepareForDataViz.R")
 
-List99Pats<-unique(PatientOverview$patient)
+shorterpat13=FALSE
 ShowSingletons=FALSE
 ShowOnlyResSites=TRUE
 
-for (patname in List99Pats[c(13,14)]){
+for (patname in List99Pats[89]){
     #gather information about the sequences in this patient before the sweep and at the timepoint where the sweep is detected. 
     if (TRUE){	
         #set filename and read fasta file into patfasta
@@ -33,6 +17,7 @@ for (patname in List99Pats[c(13,14)]){
         
         days<-sort(unique(substr(names(patfasta[,1]),5,7)),decreasing=TRUE)#last day first
         alldays<-sort(substr(names(patfasta[,1]),5,7),decreasing=TRUE)#last day first	
+        if (shorterpat13) {days <-days[3:4] ; alldays <- alldays [11:24]; seqlabels<-seqlabels[11:24]}
         #which of the sequences are from the first day of treatment
         DayTipsDay0<-which(substr(names(patfasta[,1]),5,7)==days[length(days)])
         #get.ListOfSegSites is a function I wrote to get information about each site in the sequence (e.g. whether it is polymorphic, silent etc.) 
@@ -66,38 +51,41 @@ for (patname in List99Pats[c(13,14)]){
     
     
     #make a figure
-    if (length(days)>1 & length(PatSpecResistanceCodons)>1
+    if (length(days)>1 & length(PatSpecResistanceCodons)>=1
         #Add sth here to make sure we only plot is length(days)>1
         #Add sth here to make sure we only plot id num res mut >1
     ){
         cexpos=1; wl=0.4; wr=0.4; he=0.4; HE=0.4
         #open a png file to make a figure
-        widthpng=300+25*length(SitesToDraw)
-        heightpng=500+10*numseqs	
-        figurefilename=paste("Output/Jan2018Graphs/", patname,"Short.png",sep="");
+        widthpng=300+15*length(SitesToDraw)
+        heightpng=300+15*numseqs	
+        figurefilename=paste("Output/Jan2018Graphs/", patname,"Full.png",sep="");
+        if (ShowOnlyResSites) figurefilename=paste("Output/Jan2018Graphs/", patname,"Short.png",sep="");
         png(figurefilename,width=widthpng,height=heightpng,units="px",pointsize=12,bg="white")
-        par(mar=c(1,1,3,0))
+        par(mar=c(1,1,2.,0))
         #make empty plot
-        plot(1:2,1:2,col="white",ylim=c(-4,(length(patfasta[,1]))+length(days))+2,xlim=c(-1,length(SitesToDraw)+6),ylab="",xlab="sites",yaxt="n",xaxt="n",frame.plot=FALSE)
-        title(main=paste("Viral sequences from patient",substr(patname,4,6)),cex.main = 2)	
+        plot(1:2,1:2,col="white",ylim=c(-4,(length(seqlabels))+length(days))+2,xlim=c(-1,length(SitesToDraw)+6),ylab="",xlab="sites",yaxt="n",xaxt="n",frame.plot=FALSE)
+        title(main=paste("Viral sequences from patient",substr(patname,4,6), "                    "),cex.main = 2,line = -1.)	
         
-        if (length(PROpositions)>=3) rect(xleft = 0.,ybottom = -3,xright = length(PROpositions)+0.5,ytop = -1.3,col="black")
-        if (length(RTIpositions)>=3) rect(xleft = length(PROpositions) +0.5,ybottom = -3,xright =length(SitesToDraw)+1  ,ytop = -1.3,col="grey")
+        if (length(SitesToDraw[SitesToDraw<298])>=3) rect(xleft = 0.,ybottom = -3,xright = length(SitesToDraw[SitesToDraw<298])+0.5,ytop = -1.3,col="black")
+        if (length(SitesToDraw[SitesToDraw>=298])>=3) rect(xleft = length(SitesToDraw[SitesToDraw<298]) +0.5,ybottom = -3,xright =length(SitesToDraw)+1  ,ytop = -1.3,col="darkgrey")
         extrasize=0.6; protext="PROTEASE"; RTtext="REVERSE TRANSCRIPTASE"
-        if ((length(PROpositions)<=6)|(length(RTIpositions)<=6)){extrasize=0.6;protext="PRO"; RTtext="RT"}
-        if (length(PROpositions)>=3) text(1+length(SitesToDraw)/8,-2,protext,cex=cexpos+extrasize,col="white")
-        if (length(RTIpositions)>=3) text((min(which(SitesToDraw>297))+length(SitesToDraw))/2,-2,RTtext,cex=cexpos+extrasize,col="white")
+        if ((length(SitesToDraw[SitesToDraw<298])<=6)|(length(SitesToDraw[SitesToDraw>=298])<=6)){extrasize=0.6;protext="PRO"; RTtext="RT"}
+        if (length(SitesToDraw[SitesToDraw<298])>=3) text(1+length(SitesToDraw)/8,-2,protext,cex=cexpos+extrasize,col="white")
+        if (length(SitesToDraw[SitesToDraw>=298])>=3) text((min(which(SitesToDraw>297))+length(SitesToDraw))/2,-2,RTtext,cex=cexpos+extrasize,col="white")
         
-        #indicate the locations of important resistance mutations (codon number and grey color)
+        #indicate the locations of important resistance mutations (codon number and darkgrey color)
         for (p in PatSpecResistanceCodons){
             if (substr(p,1,2)!="PI"){ # non PI sites
-                text(which(SitesToDraw == 3*(as.numeric(substr(p,3,6))+99))-1,length(patfasta[,1])+length(days)+1,substr(p,3,6),cex=2)}
+                rect(xleft= which(SitesToDraw == 3*(as.numeric(substr(p,3,6))+99))-2.5, ybottom = length(seqlabels)+length(days)+0.2-0.3, xright = which(SitesToDraw == 3*(as.numeric(substr(p,3,6))+99))+.5, ytop =length(seqlabels)+length(days)+1.8-0.5 , col="darkgrey")
+                text(which(SitesToDraw == 3*(as.numeric(substr(p,3,6))+99))-1,length(seqlabels)+length(days)+1-0.3,substr(p,3,6),cex=1.7, col="white")}
             if (substr(p,1,2)=="PI"){ # PI sites
-                text(which(SitesToDraw == 3*(as.numeric(substr(p,3,6))))-1,length(patfasta[,1])+length(days)+1,substr(p,3,6),cex=2)}}
-        for (p in PatSpecResistancePositions){
+                rect(xleft= which(SitesToDraw == 3*(as.numeric(substr(p,3,6))))-2.5, ybottom = length(seqlabels)+length(days)+0.2-0.3, xright = which(SitesToDraw == 3*(as.numeric(substr(p,3,6))))+.5, ytop =length(seqlabels)+length(days)+1.8-0.5 , col="black")
+                text(which(SitesToDraw == 3*(as.numeric(substr(p,3,6))))-1,length(seqlabels)+length(days)+1-0.3,substr(p,3,6),cex=1.7, col="white")}}
+        for (p in PatSpecResistancePositions){ #Not sure what this does...
             for (d in 1:length(days)){
                 height= range(d - 1 + which(substr(seqlabels,5,7)==days[d]))
-                rect(which(SitesToDraw==p)-wl-0.1,height[1]-.5,which(SitesToDraw==p)+wr+0.1,height[2]+0.5,density=-1,col="white",lwd=0, border="grey")}}
+                rect(which(SitesToDraw==p)-wl-0.1,height[1]-.5,which(SitesToDraw==p)+wr+0.1,height[2]+0.5,density=-1,col="white",lwd=0, border="darkgrey")}}
         
         #indicate resistance status of codon in light blue
         if (TRUE){
@@ -110,22 +98,22 @@ for (patname in List99Pats[c(13,14)]){
                         num2=which(names(patfasta[,1])==seq)
                         if (gene=="PI") {
                             y<-which(L$codon==cod); x<-which(PImuts$pos==cod)
-                            if (length(grep(translate(patfasta[num2,y]),PImuts$mut[x]))>0){co="lightgrey"
+                            if (length(grep(translate(patfasta[num2,y]),PImuts$mut[x]))>0){co="darkgrey"
                             rect(which(SitesToDraw==y[1])-HE,num-.5,which(SitesToDraw==y[3])+HE,num+.5,density=-1,col=co,lwd=0, border=co)}
                         }
                         
                         if (gene=="RTI"){
                             y<-which(L$codon==cod+99); x<-which(RTImuts$pos==cod)
                             if (length(grep(translate(patfasta[num2,y]),RTImuts$mut[x]))>0){
-                                co="lightgrey"
+                                co="darkgrey"
                                 rect(which(SitesToDraw==y[1])-HE,num-.5,which(SitesToDraw==y[3])+HE,num+.5,density=-1,col=co,lwd=0, border=co)}}
                         
                     }}
             }
         }
         #add lines between the codons
-        for (x in seq(3.5, length(PatSpecResistancePositions),by=3)){
-            lines(c(x,x),c(.5,-.5+length(seqlabels)+length(days)),col="white",lwd=3)}
+        #for (x in seq(3.5, length(PatSpecResistancePositions),by=3)){
+        #    lines(c(x,x),c(.5,-.5+length(seqlabels)+length(days)),col="white",lwd=3)}
         
         #draw colored rectangles for all other resistance relevant sites	
         for (s in PatSpecResistancePositions){
@@ -155,9 +143,9 @@ for (patname in List99Pats[c(13,14)]){
                     num=which(seqlabels==seq)+which(days==substr(seq,5,7))-1
                     num2=which(names(patfasta[,1])==seq)
                     if (patfasta[num2,s]!=L$majoritydayzero[s]){
-                        if(L$synnonsyn[s]=="non")co="red"
-                        if(L$synnonsyn[s]!="non")co="black"
-                        if(L$fourfold[s]==1)co="black"
+                        if(L$synnonsyn[s]=="non")co=brewer.pal(8,"Set3")[8] #"red"
+                        if(L$synnonsyn[s]!="non")co=brewer.pal(6,"Set3")[1] 
+                        if(L$fourfold[s]==1)co=brewer.pal(6,"Set3")[1] 
                         rect(which(SitesToDraw==s)-HE,num-HE,which(SitesToDraw==s)+HE,num+HE,density=-1,col=co,lwd=0, border=co)}}}
         }
         
