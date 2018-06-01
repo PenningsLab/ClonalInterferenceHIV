@@ -5,7 +5,7 @@ shorterpat13=FALSE
 ShowSingletons=FALSE
 ShowOnlyResSites=TRUE
 
-for (patname in List99Pats[89]){
+for (patname in List99Pats[94]){
     #gather information about the sequences in this patient before the sweep and at the timepoint where the sweep is detected. 
     if (TRUE){	
         #set filename and read fasta file into patfasta

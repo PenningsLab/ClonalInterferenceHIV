@@ -100,7 +100,7 @@ for (i in (nrow(DataTable)-1):1){
     SummedDataTable[i,] = SummedDataTable[i,] + SummedDataTable[i+1,]
 }
 
-png(paste(patname,"Muller.png",sep=""),width=500,height=400,units="px",pointsize=12,bg="white")
+png(paste("Output/", patname,"Muller_wide.png",sep=""),width=1000,height=400,units="px",pointsize=12,bg="white")
 
 layout(matrix(c(1,1)))
 par(mar=c(3, 3, 2, 0))

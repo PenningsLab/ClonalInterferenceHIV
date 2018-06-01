@@ -15,14 +15,14 @@ for (patname in List99Pats){
     numC<-length(which(patfasta[,606]=="c"))
 
     if (numC==0&numT==0) Counting606[1]=Counting606[1]+1 #neither C nor T
-    if (numC>0&numT==0) Counting606[2]=Counting606[2]+1 #C but not T
-    if (numC==0&numT>0) Counting606[3]=Counting606[3]+1 #T but not C
+    if (numC==0&numT>0) Counting606[2]=Counting606[2]+1 #T but not C
+    if (numC>0&numT==0) Counting606[3]=Counting606[3]+1 #C but not T
     if (numC>0&numT>0) Counting606[4]=Counting606[4]+1 #T and C
 }
 
 png("AACAATPiechart.png",width=500,height=400,units="px",pointsize=12,bg="white")
 par(mar=c(1,1,2,1))
-pie(Counting606,labels = c("neither AAC nor AAT", "only AAC", "only AAT", "both AAC and AAT"), col = brewer.pal(8,"Set3")[3:8], main = "Occurrence of AAC and AAT codons at position RT 103")    
+pie(Counting606,labels = c("neither AAC nor AAT", "only AAT", "only AAC", "both AAC and AAT"), col = brewer.pal(8,"Set3")[c(3,6,4,5)], main = "Occurrence of AAC and AAT codons at position RT 103")    
 dev.off()
     
 
