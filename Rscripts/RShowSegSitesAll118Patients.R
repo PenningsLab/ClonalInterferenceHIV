@@ -1,5 +1,6 @@
 #prepare data and load some packages and functions
 if (TRUE) source("Rscripts/PrepareForDataViz.R")
+if (TRUE) source("Rscripts/FilteringPatients.R")
 
 shorterpat13=FALSE
 ShowSingletons=FALSE

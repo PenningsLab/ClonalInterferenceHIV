@@ -15,5 +15,4 @@ if (TRUE){
     C<-which(names(PatientOverview)=="NN138"|names(PatientOverview)=="NN179"|names(PatientOverview)=="NN227")
     MutColumns<-MutColumns[-which(MutColumns==12|MutColumns==13|MutColumns==17)]
     List99Pats<-unique(PatientOverview$patient)
-    
 }
