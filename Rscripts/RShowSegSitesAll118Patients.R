@@ -3,16 +3,17 @@ if (TRUE) source("Rscripts/PrepareForDataViz.R")
 if (TRUE) source("Rscripts/FilteringPatients.R")
 
 shorterpat13=FALSE
+shorterpat21=TRUE #List99Pats[15]
 ShowSingletons=FALSE
-ShowOnlyResSites=TRUE
+ShowOnlyResSites=FALSE
 
-for (patname in List99Pats[94]){
+for (patname in List99Pats[15]){
     #gather information about the sequences in this patient before the sweep and at the timepoint where the sweep is detected. 
     if (TRUE){	
         #set filename and read fasta file into patfasta
         filename=paste("OriginalData/FASTAfiles/",patname,".fasta",sep="")
         patfasta<-read.dna(filename, format = "fasta",as.character=TRUE)
-        patfastafasta<-read.dna(filename, format = "fasta")
+        if (shorterpat21) patfasta<-patfasta[1:34,]
         #seqlabels is the list of sequence labels
         seqlabels<-sort(names(patfasta[,1]),decreasing=TRUE)#last day first
         
@@ -62,6 +63,7 @@ for (patname in List99Pats[94]){
         heightpng=300+15*numseqs	
         figurefilename=paste("Output/Jan2018Graphs/", patname,"Full.png",sep="");
         if (ShowOnlyResSites) figurefilename=paste("Output/Jan2018Graphs/", patname,"Short.png",sep="");
+        if ((shorterpat13 & patname == "P00013")| (shorterpat21 & patname == "P00021")) figurefilename=paste("Output/Jan2018Graphs/", patname,"Cropped.png",sep="");
         png(figurefilename,width=widthpng,height=heightpng,units="px",pointsize=12,bg="white")
         par(mar=c(1,1,2.,0))
         #make empty plot

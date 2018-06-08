@@ -19,7 +19,6 @@ PositionsPRO<-PImuts$pos
 AllNtPositionsInvolvedInResistance<-sort(c(c((PositionsRT+99),PositionsPRO)*3,c((PositionsRT+99),PositionsPRO)*3-1,c((PositionsRT+99),PositionsPRO)*3-2))
 
 RTImuts<-rbind(NNRTImuts,NRTImuts)
-RTImuts$mut[which(RTImuts$pos==67)]<-"NR"
 
 
 
