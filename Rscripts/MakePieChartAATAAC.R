@@ -45,6 +45,19 @@ for (patname in List99Pats){
         print(patname)}
     }
 
+#soft at 41: 
+#[1] "P00001" hardening
+#[1] "P00026" soft and partial
+#[1] "P00029" softening but incomplete
+#[1] "P00045" soft 
+#[1] "P00060" hardening
+#[1] "P00072" soft
+#[1] "P00094" hardening
+#[1] "P00106" hardening 
+#[1] "P00107" softreniung but T allele is singkleton
+#[1] "P00133" hardening 
+#[1] "P00145" unclear
+
 png("Output/CTCTTC_M41L_Piechart.png",width=500,height=400,units="px",pointsize=12,bg="white")
 par(mar=c(1,1,2,1))
 pie(Counting41,labels = c("neither CTC nor TTC", "only CTC", "only TTC", "both CTC and TTC"), col = brewer.pal(8,"Set3")[3:8], main = "Occurrence of CTC and TTC codons at position RT 41")    
