@@ -3,13 +3,14 @@ if (TRUE) source("Rscripts/PrepareForDataViz.R")
 if (TRUE) source("Rscripts/FilteringPatients.R")
 
 shorterpat13=FALSE
-shorterpat21=TRUE #List99Pats[15]
+shorterpat21=FALSE #List99Pats[15]
 ShowSingletons=FALSE
 ShowOnlyResSites=FALSE
 
-for (patname in List99Pats[15]){
+for (patname in List99Pats[c(35,49,118)]){
     #gather information about the sequences in this patient before the sweep and at the timepoint where the sweep is detected. 
     if (TRUE){	
+        print(patname)
         #set filename and read fasta file into patfasta
         filename=paste("OriginalData/FASTAfiles/",patname,".fasta",sep="")
         patfasta<-read.dna(filename, format = "fasta",as.character=TRUE)
@@ -35,7 +36,7 @@ for (patname in List99Pats[15]){
         PatSpecResistanceCodons<-vector()
         for (i in 1:length(MutColumns)){
             if (sum(PatientOverview[PatientOverview$patient==patname,MutColumns[i]])>0){
-                print (paste(i,names(PatientOverview)[MutColumns[i]]))  
+                #print (paste(i,names(PatientOverview)[MutColumns[i]]))  
                 PatSpecResistanceCodons<-c(PatSpecResistanceCodons,names(PatientOverview)[MutColumns[i]])
             }}
         #which of the mutations in the patient are RT mutations? 
@@ -53,22 +54,26 @@ for (patname in List99Pats[15]){
     
     
     #make a figure
-    if (length(days)>1 & length(PatSpecResistanceCodons)>=1
-        #Add sth here to make sure we only plot is length(days)>1
+    if (length(days)>0 & length(PatSpecResistanceCodons)>=0
+#Oct 2018 effectively removed this filter
+                #Add sth here to make sure we only plot is length(days)>1
         #Add sth here to make sure we only plot id num res mut >1
     ){
         cexpos=1; wl=0.4; wr=0.4; he=0.4; HE=0.4
         #open a png file to make a figure
-        widthpng=300+15*length(SitesToDraw)
-        heightpng=300+15*numseqs	
-        figurefilename=paste("Output/Jan2018Graphs/", patname,"Full.png",sep="");
+        widthpng=max(750,300+15*length(SitesToDraw))
+        print(widthpng)
+        heightpng=max(600,300+15*numseqs)
+        print(heightpng)
+        figurefilename=paste("Output/Jan2018Graphs/N", patname,"Full.png",sep="");
         if (ShowOnlyResSites) figurefilename=paste("Output/Jan2018Graphs/", patname,"Short.png",sep="");
         if ((shorterpat13 & patname == "P00013")| (shorterpat21 & patname == "P00021")) figurefilename=paste("Output/Jan2018Graphs/", patname,"Cropped.png",sep="");
         png(figurefilename,width=widthpng,height=heightpng,units="px",pointsize=12,bg="white")
-        par(mar=c(1,1,2.,0))
+        par(mar=c(1.7,1,2.,0))
         #make empty plot
-        plot(1:2,1:2,col="white",ylim=c(-4,(length(seqlabels))+length(days))+2,xlim=c(-1,length(SitesToDraw)+6),ylab="",xlab="sites",yaxt="n",xaxt="n",frame.plot=FALSE)
-        title(main=paste("Viral sequences from patient",substr(patname,4,6), "                    "),cex.main = 2,line = -1.)	
+        plot(1:2,1:2,col="white",ylim=c(-4,(length(seqlabels))+length(days))+2,xlim=c(-1,length(SitesToDraw)+6),
+             ylab="",xlab="sites",yaxt="n",xaxt="n",frame.plot=FALSE)
+        title(main=paste("Viral sequences from patient",substr(patname,4,6), "                    "),cex.main = 2,line = -.5)
         
         if (length(SitesToDraw[SitesToDraw<298])>=3) rect(xleft = 0.,ybottom = -3,xright = length(SitesToDraw[SitesToDraw<298])+0.5,ytop = -1.3,col="black")
         if (length(SitesToDraw[SitesToDraw>=298])>=3) rect(xleft = length(SitesToDraw[SitesToDraw<298]) +0.5,ybottom = -3,xright =length(SitesToDraw)+1  ,ytop = -1.3,col="darkgrey")
@@ -162,7 +167,11 @@ for (patname in List99Pats[15]){
             lines(x=c(length(SitesToDraw)+1,length(SitesToDraw)+1),y=c(height[1]-0.5,height[2]+0.5))
             text(pos=4, length(SitesToDraw)+1.2, mean(height),paste("day",as.numeric(days[d])),cex=cexpos*2,srt=0)}
         
-        #mtext("Data from Bacheler et al 2000, Figure related to and by: Pennings, Kryazhimskiy, Wakeley 2013", 4, line=-2)
+        Txtxt<-paste("( likely",PatientOverview$Tx[PatientOverview$patient==patname][1],")        ")
+        if (nchar(Txtxt)<70)Txtxt<-(paste(Txtxt,"              "))
+        mtext(Txtxt, side =3, line=-2.1,col=4,cex=1.5)
+        #mtext(PatientOverview$Tx[PatientOverview$patient==patname][1], side =3, line=-2,col=0,cex=1.5)
+        mtext("Williams, Pennings, 2018. Data from Bacheler et al 2000           ", side =1, line=.5,col=4, cex=1.5)
         
         #close the file
         dev.off() 
