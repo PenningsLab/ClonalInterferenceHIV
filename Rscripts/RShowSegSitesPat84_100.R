@@ -4,17 +4,22 @@ if (TRUE) source("Rscripts/FilteringPatients.R")
 
 shorterpat13=FALSE
 shorterpat21=FALSE #List99Pats[15]
+shorterpat84=FALSE
+shorterpat100 = FALSE
 ShowSingletons=FALSE
-ShowOnlyResSites=FALSE
+ShowOnlyResSites=TRUE
 
-for (patname in List99Pats[c(59)]){
+for (patname in List99Pats[c(48)]){ # 48 is patient 84 #59 is patient 100
     #gather information about the sequences in this patient before the sweep and at the timepoint where the sweep is detected. 
     if (TRUE){	
         print(patname)
+        if (patname == "P00100") shorterpat100 = TRUE
+        if (patname == "P00084")shorterpat84=TRUE
         #set filename and read fasta file into patfasta
         filename=paste("OriginalData/FASTAfiles/",patname,".fasta",sep="")
         patfasta<-read.dna(filename, format = "fasta",as.character=TRUE)
-        if (shorterpat21) patfasta<-patfasta[1:34,]
+        if (shorterpat84) patfasta<-patfasta[1:20,]
+        if (shorterpat100) patfasta<-patfasta[1:16,]
         #seqlabels is the list of sequence labels
         seqlabels<-sort(names(patfasta[,1]),decreasing=TRUE)#last day first
         
@@ -39,6 +44,9 @@ for (patname in List99Pats[c(59)]){
                 #print (paste(i,names(PatientOverview)[MutColumns[i]]))  
                 PatSpecResistanceCodons<-c(PatSpecResistanceCodons,names(PatientOverview)[MutColumns[i]])
             }}
+        
+        if (shorterpat84) PatSpecResistanceCodons <-PatSpecResistanceCodons[-c(1,2,5)]
+        if (shorterpat100) PatSpecResistanceCodons <-PatSpecResistanceCodons[c(1,3,4,5)]
         #which of the mutations in the patient are RT mutations? 
         PositionsRTImp<-as.numeric(substr(PatSpecResistanceCodons[which(substr(PatSpecResistanceCodons,1,2)!="PI")],3,6))
         RTIpositions<-vector(); for (c in PositionsRTImp){RTIpositions<-c(RTIpositions,which(L$codon==c+99))}
@@ -64,8 +72,8 @@ for (patname in List99Pats[c(59)]){
         print(widthpng)
         heightpng=max(600,300+15*numseqs)
         print(heightpng)
-        figurefilename=paste("Output/Jan2018Graphs/N", patname,"Full.png",sep="");
-        if (ShowOnlyResSites) figurefilename=paste("Output/Jan2018Graphs/", patname,"Short.png",sep="");
+        figurefilename=paste("Output/", patname,"Sept2019.png",sep="");
+        #if (ShowOnlyResSites) figurefilename=paste("Output/Jan2018Graphs/", patname,"Short.png",sep="");
         if ((shorterpat13 & patname == "P00013")| (shorterpat21 & patname == "P00021")) figurefilename=paste("Output/Jan2018Graphs/", patname,"Cropped.png",sep="");
         png(figurefilename,width=widthpng,height=heightpng,units="px",pointsize=12,bg="white")
         par(mar=c(1.7,1,2.,0))
@@ -125,6 +133,8 @@ for (patname in List99Pats[c(59)]){
         #draw colored rectangles for all other resistance relevant sites	
         for (s in PatSpecResistancePositions){
             #if (s<604|s>606){
+            print(L$status[s])
+            print(s)
                 for (seq in seqlabels){
                     num=which(seqlabels==seq)+which(days==substr(seq,5,7))-1
                     num2=which(names(patfasta[,1])==seq)
@@ -135,6 +145,10 @@ for (patname in List99Pats[c(59)]){
                             }
                         if (L$status[s]!="N"&as.character(consensusB)[s] != L$majoritydayzero[s] & patfasta[num2,s]!=L$majoritydayzero[s]){
                             rect(which(SitesToDraw==s)-HE,num-HE,which(SitesToDraw==s)+HE,num+HE,density=-1,col=col,lwd=0, border=col)
+                        }
+                        if (as.character(consensusB)[s] != L$majoritydayzero[s]){ #added sept 2019
+                            rect(which(SitesToDraw==s)-HE,num-HE,which(SitesToDraw==s)+HE,num+HE,density=-1,col=col,lwd=0, border=col)
+                            print("here")
                         }
                     text(which(SitesToDraw==s),num,toupper(patfasta[num2,s]),col="black",cex=cexpos*1)
                    }
@@ -168,9 +182,9 @@ for (patname in List99Pats[c(59)]){
         
         Txtxt<-paste("( likely",PatientOverview$Tx[PatientOverview$patient==patname][1],")        ")
         if (nchar(Txtxt)<70)Txtxt<-(paste(Txtxt,"              "))
-        mtext(Txtxt, side =3, line=-2.1,col=4,cex=1.5)
+        #mtext(Txtxt, side =3, line=-2.1,col=4,cex=1.5)
         #mtext(PatientOverview$Tx[PatientOverview$patient==patname][1], side =3, line=-2,col=0,cex=1.5)
-        mtext("Williams, Pennings, 2018. Data from Bacheler et al 2000           ", side =1, line=.5,col=4, cex=1.5)
+        #mtext("Williams, Pennings, 2018. Data from Bacheler et al 2000           ", side =1, line=.5,col=4, cex=1.5)
         
         #close the file
         dev.off() 
